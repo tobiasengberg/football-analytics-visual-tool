@@ -1,0 +1,44 @@
+body {
+  width: 1300px;
+  background-color: #56be08;
+}
+
+.st0 {
+  fill: #56be08;
+}
+.st1 {
+  fill: none;
+}
+.st2 {
+  fill: #ffffff;
+}
+
+svg text {
+  font-size: 19px;
+  fill: #fff;
+  font-family: MyriadPro-Bold, Myriad Pro;
+  font-weight: 700;
+  cursor: default;
+  user-select: none;
+}
+
+svg circle {
+  stroke-width: 1px;
+  stroke: white;
+}
+
+svg line {
+  stroke: yellow;
+  stroke-width: 2;
+  stroke-dasharray: 5;
+}
+
+svg polygon {
+  fill: rgba(28, 156, 230, 0.1);
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 2;
+}
+
+.circle_selected {
+  opacity: 0.5;
+}
