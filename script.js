@@ -10,6 +10,12 @@ var selectionBegun = false;
 var selectionStop = true;
 var circlesSelected = false;
 
+function AttributesSetting(target, attributesList) {
+  for (let i = 0; i < attributesList.length; i++) {
+    target.setAttribute(attributesList[i][0], attributesList[i][1]);
+  }
+}
+
 // Creates a player with team colored circle and number grouped.
 // Presently without id, which could be added in another stage of the design.
 function createPlayer() {
@@ -24,10 +30,14 @@ function createPlayer() {
     "http://www.w3.org/2000/svg",
     "circle"
   );
-  createCircle.setAttribute("cy", "0");
-  createCircle.setAttribute("cx", "0");
-  createCircle.setAttribute("r", "15");
-  createCircle.setAttribute("fill", teamColor);
+
+  AttributesSetting(createCircle, [
+    ["cy", "0"],
+    ["cx", "0"],
+    ["r", "15"],
+    ["fill", teamColor],
+  ]);
+
   createGroup.appendChild(createCircle);
 
   let createNumber = document.createElementNS(
@@ -77,10 +87,13 @@ function drawLine() {
     "http://www.w3.org/2000/svg",
     "line"
   );
-  createLine.setAttribute("x1", "220");
-  createLine.setAttribute("y1", "320");
-  createLine.setAttribute("x2", "290");
-  createLine.setAttribute("x1", "350");
+
+  AttributesSetting(createLine, [
+    ["x1", "320"],
+    ["y1", "320"],
+    ["x2", "590"],
+    ["y2", "340"],
+  ]);
   document.getElementById("analytics").appendChild(createLine);
 }
 
@@ -122,8 +135,12 @@ function selectionBox() {
       "polygon"
     );
     let startPoint = fourCorners();
-    createSelection.setAttribute("id", "selection_box");
-    createSelection.setAttribute("points", startPoint);
+
+    AttributesSetting(createSelection, [
+      ["id", "selection_box"],
+      ["points", startPoint],
+    ]);
+
     document.getElementById("selection").appendChild(createSelection);
   } else if (selectionBegun && !selectionStop) {
     document
