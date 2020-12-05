@@ -135,12 +135,10 @@ function selectionBox() {
       "polygon"
     );
     let startPoint = fourCorners();
-
     AttributesSetting(createSelection, [
       ["id", "selection_box"],
       ["points", startPoint],
     ]);
-
     document.getElementById("selection").appendChild(createSelection);
   } else if (selectionBegun && !selectionStop) {
     document
@@ -274,5 +272,40 @@ window.addEventListener("mouseup", function (e) {
       }
       selectionBox();
     }
+  }
+});
+
+window.addEventListener("keydown", function (e) {
+  console.log(e.key);
+  switch (e.key) {
+    case "n":
+      if (circlesSelected) {
+        let namedSelection = window.prompt(
+          "Name the group of players you have selected:"
+        );
+        let selection = document.getElementsByClassName("circle_selected");
+        for (let index = 0; index < selection.length; index++) {
+          AttributesSetting(selection[index].parentElement, [
+            ["class", namedSelection],
+          ]);
+        }
+      }
+      break;
+    case "ArrowLeft":
+      e.preventDefault();
+      if (circlesSelected) {
+        let selection = document.getElementsByClassName("circle_selected");
+        for (let index = 0; index < selection.length; index++) {
+          let target = selection[index].parentElement;
+          let position = target.getAttribute("transform");
+          console.log(position);
+          AttributesSetting(target, [
+            ["transform", "translate(70 " + 150 + ")"],
+          ]);
+        }
+      }
+
+    default:
+      break;
   }
 });
