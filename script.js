@@ -1,14 +1,14 @@
-var teamColor = "blue";
-var playerNumber = 1;
-var yPosition = 150; // Used by several functions
-var xPosition = 80; // Used by several functions
-var xOrigin = 0; // Used by several functions
-var yOrigin = 0; // Used by several functions
-var holdsPlayer = false;
-var playerHeld = 0;
-var selectionBegun = false;
-var selectionStop = true;
-var circlesSelected = false;
+const teamColor = "blue";
+const playerNumber = 1;
+const yPosition = 150; // Used by several functions
+const xPosition = 80; // Used by several functions
+const xOrigin = 0; // Used by several functions
+const yOrigin = 0; // Used by several functions
+const holdsPlayer = false;
+const playerHeld = 0;
+const selectionBegun = false;
+const selectionStop = true;
+const circlesSelected = false;
 
 function AttributesSetting(target, attributesList) {
   for (let i = 0; i < attributesList.length; i++) {
@@ -275,6 +275,8 @@ window.addEventListener("mouseup", function (e) {
   }
 });
 
+// Maybe this is useless. But let's continue and see if this comes to use
+// Could be in connection with named sections
 window.addEventListener("keydown", function (e) {
   console.log(e.key);
   switch (e.key) {
