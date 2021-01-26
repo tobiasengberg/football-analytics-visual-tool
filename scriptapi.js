@@ -3,8 +3,8 @@ function findFormation() {
     .then((response) => {
       return response.json();
     })
-    .then((response) => {
-      console.log(response.response[0].formation);
+    .then((data) => {
+      console.log(data.response[0].formation);
     });
 }
 
@@ -13,8 +13,8 @@ function findPlayers() {
     .then((response) => {
       return response.json();
     })
-    .then((response) => {
-      response.response[0].startXI.forEach((element) => {
+    .then((data) => {
+      data.response[0].startXI.forEach((element) => {
         console.log(
           element.player.number,
           element.player.name,

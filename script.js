@@ -1,49 +1,46 @@
-const teamColor = "blue";
-const playerNumber = 1;
-const yPosition = 150; // Used by several functions
-const xPosition = 80; // Used by several functions
-const xOrigin = 0; // Used by several functions
-const yOrigin = 0; // Used by several functions
-const holdsPlayer = false;
-const playerHeld = 0;
-const selectionBegun = false;
-const selectionStop = true;
-const circlesSelected = false;
+let teamColor = "blue";
+let playerNumber = 1;
+let yPosition = 150; // Used by several functions
+let xPosition = 80; // Used by several functions
+let xOrigin = 0; // Used by several functions
+let yOrigin = 0; // Used by several functions
+let holdsPlayer = false;
+let playerHeld = 0;
+let selectionBegun = false;
+let selectionStop = true;
+let circlesSelected = false;
 
-function AttributesSetting(target, attributesList) {
-  for (let i = 0; i < attributesList.length; i++) {
-    target.setAttribute(attributesList[i][0], attributesList[i][1]);
-  }
-}
+const createSvg = (kind) => document.createElementNS("http://www.w3.org/2000/svg", kind);
+
+const AttributesSetting = (target, attributes) =>
+  attributes.forEach((attr) => {
+    target.setAttribute(attr[0], attr[1]);
+  });
+
+//Refactored version below
+//function AttributesSetting(target, attributesList) {
+//  for (let i = 0; i < attributesList.length; i++) {
+//    target.setAttribute(attributesList[i][0], attributesList[i][1]);
+//  }
+//}
 
 // Creates a player with team colored circle and number grouped.
 // Presently without id, which could be added in another stage of the design.
 function createPlayer() {
-  let createGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  createGroup.setAttribute(
-    "transform",
-    "translate(" + xPosition + " " + yPosition + ")"
-  );
+  let createGroup = createSvg("g");
+  createGroup.setAttribute("transform", "translate(" + xPosition + " " + yPosition + ")");
   document.getElementById("players").appendChild(createGroup);
 
-  let createCircle = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "circle"
-  );
-
+  let createCircle = createSvg("circle");
   AttributesSetting(createCircle, [
     ["cy", "0"],
     ["cx", "0"],
     ["r", "15"],
     ["fill", teamColor],
   ]);
-
   createGroup.appendChild(createCircle);
 
-  let createNumber = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "text"
-  );
+  let createNumber = createSvg("text");
   createNumber.textContent = playerNumber;
   if (playerNumber < 10) {
     createNumber.setAttribute("transform", "translate(-5 6)");
@@ -55,10 +52,7 @@ function createPlayer() {
 
 // Creates 22 players in a single group with the id "players"
 function createTeams() {
-  let createPlayerGroup = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "g"
-  );
+  let createPlayerGroup = createSvg("g");
   createPlayerGroup.setAttribute("id", "players");
   document.getElementsByTagName("svg")[0].appendChild(createPlayerGroup);
   for (let team = 1; team < 3; team++) {
@@ -77,16 +71,13 @@ function createTeams() {
 // To keep the SVG organized.
 // The groups then provide an essential function in getting elements.
 function createSVGGroup(title) {
-  let createGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  let createGroup = createSvg("g");
   createGroup.setAttribute("id", title);
   document.getElementsByTagName("svg")[0].appendChild(createGroup);
 }
 
 function drawLine() {
-  let createLine = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "line"
-  );
+  let createLine = createSvg("line");
 
   AttributesSetting(createLine, [
     ["x1", "320"],
@@ -103,14 +94,9 @@ function checkSpace() {
   let spaceFree = true;
   let playerList = document.getElementById("players").children;
   for (let player = 0; player < 22; player++) {
-    let distanceX =
-      playerList[player].transform.animVal[0].matrix.e - xPosition;
-    let distanceY =
-      playerList[player].transform.animVal[0].matrix.f - yPosition;
-    if (
-      Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)) < 31 &&
-      playerHeld != playerList[player]
-    ) {
+    let distanceX = playerList[player].transform.animVal[0].matrix.e - xPosition;
+    let distanceY = playerList[player].transform.animVal[0].matrix.f - yPosition;
+    if (Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)) < 31 && playerHeld != playerList[player]) {
       spaceFree = false;
     }
   }
@@ -130,10 +116,7 @@ function inBounds(e) {
 
 function selectionBox() {
   if (selectionBegun && selectionStop) {
-    let createSelection = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "polygon"
-    );
+    let createSelection = createSvg("polygon");
     let startPoint = fourCorners();
     AttributesSetting(createSelection, [
       ["id", "selection_box"],
@@ -141,13 +124,9 @@ function selectionBox() {
     ]);
     document.getElementById("selection").appendChild(createSelection);
   } else if (selectionBegun && !selectionStop) {
-    document
-      .getElementById("selection_box")
-      .setAttribute("points", fourCorners());
+    document.getElementById("selection_box").setAttribute("points", fourCorners());
   } else {
-    document
-      .getElementById("selection")
-      .removeChild(document.getElementById("selection_box"));
+    document.getElementById("selection").removeChild(document.getElementById("selection_box"));
     grabSelectedPlayers();
     circlesSelected = true;
   }
@@ -191,10 +170,7 @@ function grabSelectedPlayers() {
     if (xPoint > xOrigin - 14 && xPoint < xPosition + 14) {
       let yPoint = playerList[player].transform.animVal[0].matrix.f;
       if (yPoint > yOrigin - 14 && yPoint < yPosition + 14) {
-        playerList[player].firstElementChild.setAttribute(
-          "class",
-          "circle_selected"
-        );
+        playerList[player].firstElementChild.setAttribute("class", "circle_selected");
         circlesSelected = true;
       }
     }
@@ -218,10 +194,7 @@ drawLine();
 
 window.addEventListener("mousedown", function (e) {
   if (inBounds(e)) {
-    if (
-      e.target.tagName != "rect" &&
-      e.target.parentElement.parentElement.tagName == "g"
-    ) {
+    if (e.target.tagName != "rect" && e.target.parentElement.parentElement.tagName == "g") {
       if (e.target.parentElement.firstChild.getAttribute("class") == null) {
         clearSelected();
       }
@@ -242,10 +215,7 @@ window.addEventListener("mousedown", function (e) {
 
 window.addEventListener("mousemove", function (e) {
   if (holdsPlayer) {
-    playerHeld.setAttribute(
-      "transform",
-      "translate(" + e.pageX + " " + e.pageY + ")"
-    );
+    playerHeld.setAttribute("transform", "translate(" + e.pageX + " " + e.pageY + ")");
   } else if (selectionBegun) {
     selectionStop = false;
     xPosition = e.pageX;
@@ -282,14 +252,10 @@ window.addEventListener("keydown", function (e) {
   switch (e.key) {
     case "n":
       if (circlesSelected) {
-        let namedSelection = window.prompt(
-          "Name the group of players you have selected:"
-        );
+        let namedSelection = window.prompt("Name the group of players you have selected:");
         let selection = document.getElementsByClassName("circle_selected");
         for (let index = 0; index < selection.length; index++) {
-          AttributesSetting(selection[index].parentElement, [
-            ["class", namedSelection],
-          ]);
+          AttributesSetting(selection[index].parentElement, [["class", namedSelection]]);
         }
       }
       break;
@@ -301,9 +267,7 @@ window.addEventListener("keydown", function (e) {
           let target = selection[index].parentElement;
           let position = target.getAttribute("transform");
           console.log(position);
-          AttributesSetting(target, [
-            ["transform", "translate(70 " + 150 + ")"],
-          ]);
+          AttributesSetting(target, [["transform", "translate(70 " + 150 + ")"]]);
         }
       }
 
