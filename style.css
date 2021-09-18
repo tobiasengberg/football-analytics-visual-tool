@@ -29,11 +29,14 @@ svg circle {
 
 svg line {
   stroke: yellow;
-  stroke-width: 2;
-  stroke-dasharray: 5;
+  stroke-width: 3;
 }
 
 svg polygon {
+  fill: yellow;
+}
+
+svg > g polygon {
   fill: rgba(28, 156, 230, 0.1);
   stroke: rgba(255, 255, 255, 0.3);
   stroke-width: 2;
@@ -41,4 +44,8 @@ svg polygon {
 
 .circle_selected {
   opacity: 0.5;
+}
+
+.cursor {
+  cursor: url(/img/pencil.svg), pointer;
 }

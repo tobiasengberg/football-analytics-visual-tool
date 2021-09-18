@@ -8,7 +8,11 @@ let holdsPlayer = false;
 let playerHeld = 0;
 let selectionBegun = false;
 let selectionStop = true;
+let drawBegun = false;
+let drawStop = true;
 let circlesSelected = false;
+let pen = false;
+let dashed = false;
 
 const createSvg = (kind) => document.createElementNS("http://www.w3.org/2000/svg", kind);
 
@@ -17,18 +21,11 @@ const AttributesSetting = (target, attributes) =>
     target.setAttribute(attr[0], attr[1]);
   });
 
-//Refactored version below
-//function AttributesSetting(target, attributesList) {
-//  for (let i = 0; i < attributesList.length; i++) {
-//    target.setAttribute(attributesList[i][0], attributesList[i][1]);
-//  }
-//}
-
 // Creates a player with team colored circle and number grouped.
 // Presently without id, which could be added in another stage of the design.
 function createPlayer() {
   let createGroup = createSvg("g");
-  createGroup.setAttribute("transform", "translate(" + xPosition + " " + yPosition + ")");
+  createGroup.setAttribute("transform", `translate(${xPosition} ${yPosition})`);
   document.getElementById("players").appendChild(createGroup);
 
   let createCircle = createSvg("circle");
@@ -77,15 +74,27 @@ function createSVGGroup(title) {
 }
 
 function drawLine() {
-  let createLine = createSvg("line");
-
-  AttributesSetting(createLine, [
-    ["x1", "320"],
-    ["y1", "320"],
-    ["x2", "590"],
-    ["y2", "340"],
-  ]);
-  document.getElementById("analytics").appendChild(createLine);
+  if (!drawBegun && !drawStop) {
+    let createLine = createSvg("line");
+    AttributesSetting(createLine, [
+      ["x1", xOrigin - 7],
+      ["y1", yOrigin + 7],
+      ["x2", xOrigin - 7],
+      ["y2", yOrigin + 7],
+      ["marker-end", "url(#arrowhead)"],
+      ["stroke-dasharray", dashed ? "5" : "0"],
+    ]);
+    document.getElementById("analytics").appendChild(createLine);
+    drawBegun = true;
+  } else if (drawBegun && !drawStop) {
+    AttributesSetting(document.getElementById("analytics").lastElementChild, [
+      ["x2", xPosition - 7],
+      ["y2", yPosition + 7],
+    ]);
+  } else if (drawBegun && drawStop) {
+    drawBegun = false;
+    drawStop = false;
+  }
 }
 
 // Checks if the space is free from another player.
@@ -105,13 +114,7 @@ function checkSpace() {
 
 // Checks if a mouse event is within the bounds of the SVG viewport
 function inBounds(e) {
-  if (e.pageX < 1300 && e.pageX > 0) {
-    if (e.pageY < 700 && e.pageY > 0) {
-      return true;
-    }
-    return false;
-  }
-  return false;
+  return e.pageX < 1300 && e.pageX > 0 && e.pageY < 700 && e.pageY > 0 ? true : false;
 }
 
 function selectionBox() {
@@ -128,29 +131,11 @@ function selectionBox() {
   } else {
     document.getElementById("selection").removeChild(document.getElementById("selection_box"));
     grabSelectedPlayers();
-    circlesSelected = true;
   }
 }
 
 function fourCorners() {
-  return (
-    "" +
-    xOrigin +
-    ", " +
-    yOrigin +
-    " " +
-    xPosition +
-    ", " +
-    yOrigin +
-    " " +
-    xPosition +
-    ", " +
-    yPosition +
-    " " +
-    xOrigin +
-    ", " +
-    yPosition
-  );
+  return `${xOrigin}, ${yOrigin}, ${xPosition}, ${yOrigin}, ${xPosition}, ${yPosition}, ${xOrigin}, ${yPosition}`;
 }
 
 function grabSelectedPlayers() {
@@ -177,6 +162,37 @@ function grabSelectedPlayers() {
   }
 }
 
+function moveSelected(direction) {
+  let selection = document.getElementsByClassName("circle_selected");
+  for (let index = 0; index < selection.length; index++) {
+    playerHeld = selection[index].parentElement;
+    let position = playerHeld.getAttribute("transform");
+    let parameters = position.substring(10, position.length - 1).split(" ");
+    playerHeld.setAttribute("transform", "translate(" + directionMove(direction, parameters[0], parameters[1]) + ")");
+  }
+}
+
+const directionMove = (arrow, x, y) => {
+  switch (arrow) {
+    case "left":
+      xPosition = Number(x) - 20;
+      yPosition = Number(y);
+      return checkSpace() ? `${Number(x) - 20} ${Number(y)}` : `${Number(x)} ${Number(y)}`;
+    case "up":
+      xPosition = Number(x);
+      yPosition = Number(y) - 20;
+      return checkSpace() ? `${Number(x)} ${Number(y) - 20}` : `${Number(x)} ${Number(y)}`;
+    case "down":
+      xPosition = Number(x);
+      yPosition = Number(y) + 20;
+      return checkSpace() ? `${Number(x)} ${Number(y) + 20}` : `${Number(x)} ${Number(y)}`;
+    case "right":
+      xPosition = Number(x) + 20;
+      yPosition = Number(y);
+      return checkSpace() ? `${Number(x) + 20} ${Number(y)}` : `${Number(x)} ${Number(y)}`;
+  }
+};
+
 function clearSelected() {
   circlesSelected = false;
   let playerList = document.getElementById("players").children;
@@ -190,25 +206,30 @@ function clearSelected() {
 createSVGGroup("analytics");
 createTeams();
 createSVGGroup("selection");
-drawLine();
 
 window.addEventListener("mousedown", function (e) {
+  let item = e.target.parentElement;
   if (inBounds(e)) {
-    if (e.target.tagName != "rect" && e.target.parentElement.parentElement.tagName == "g") {
-      if (e.target.parentElement.firstChild.getAttribute("class") == null) {
+    if (e.target.tagName != "rect" && item.parentElement.tagName == "g" && !pen) {
+      if (item.firstChild.getAttribute("class") == null) {
         clearSelected();
       }
       if (!holdsPlayer) {
-        playerHeld = e.target.parentElement;
+        playerHeld = item;
       }
       holdsPlayer = true;
-    } else if (e.target.tagName == "rect" && !selectionBegun) {
+    } else if (e.target.tagName == "rect" && !selectionBegun && !pen) {
       selectionBegun = true;
       xOrigin = e.pageX;
       xPosition = xOrigin + 1;
       yOrigin = e.pageY;
       yPosition = yOrigin + 1;
       selectionBox();
+    } else if (e.target.tagName == "rect" && !drawBegun && pen) {
+      xOrigin = e.pageX;
+      yOrigin = e.pageY;
+      drawStop = false;
+      drawLine();
     }
   }
 });
@@ -221,6 +242,10 @@ window.addEventListener("mousemove", function (e) {
     xPosition = e.pageX;
     yPosition = e.pageY;
     selectionBox();
+  } else if (drawBegun) {
+    xPosition = e.pageX;
+    yPosition = e.pageY;
+    drawLine();
   }
 });
 
@@ -241,36 +266,42 @@ window.addEventListener("mouseup", function (e) {
         clearSelected();
       }
       selectionBox();
+    } else if (drawBegun) {
+      drawStop = true;
+      drawLine();
     }
   }
 });
 
-// Maybe this is useless. But let's continue and see if this comes to use
-// Could be in connection with named sections
 window.addEventListener("keydown", function (e) {
-  console.log(e.key);
-  switch (e.key) {
-    case "n":
-      if (circlesSelected) {
-        let namedSelection = window.prompt("Name the group of players you have selected:");
-        let selection = document.getElementsByClassName("circle_selected");
-        for (let index = 0; index < selection.length; index++) {
-          AttributesSetting(selection[index].parentElement, [["class", namedSelection]]);
-        }
-      }
+  e.preventDefault();
+  switch (true) {
+    case e.key == "p" && !holdsPlayer && !circlesSelected:
+      document.getElementById("general").classList.toggle("cursor");
+      pen = pen ? false : true;
       break;
-    case "ArrowLeft":
-      e.preventDefault();
-      if (circlesSelected) {
-        let selection = document.getElementsByClassName("circle_selected");
-        for (let index = 0; index < selection.length; index++) {
-          let target = selection[index].parentElement;
-          let position = target.getAttribute("transform");
-          console.log(position);
-          AttributesSetting(target, [["transform", "translate(70 " + 150 + ")"]]);
-        }
-      }
-
+    case e.key == "Escape" && circlesSelected:
+      clearSelected();
+      circlesSelected = false;
+      break;
+    case e.key == "Backspace" && pen:
+      document.getElementById("analytics").lastElementChild.remove();
+      break;
+    case e.key == "d":
+      dashed = dashed ? false : true;
+      break;
+    case e.key == "ArrowLeft" && circlesSelected:
+      moveSelected("left");
+      break;
+    case e.key == "ArrowRight" && circlesSelected:
+      moveSelected("right");
+      break;
+    case e.key == "ArrowDown" && circlesSelected:
+      moveSelected("down");
+      break;
+    case e.key == "ArrowUp" && circlesSelected:
+      moveSelected("up");
+      break;
     default:
       break;
   }
