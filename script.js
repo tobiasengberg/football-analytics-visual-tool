@@ -13,6 +13,7 @@ let drawStop = true;
 let circlesSelected = false;
 let pen = false;
 let dashed = false;
+let edit = false;
 
 const createSvg = (kind) => document.createElementNS("http://www.w3.org/2000/svg", kind);
 
@@ -286,6 +287,15 @@ window.addEventListener("keydown", function (e) {
       break;
     case e.key == "Backspace" && pen:
       document.getElementById("analytics").lastElementChild.remove();
+      break;
+    case e.key == "e" && pen && !edit:
+      edit = true;
+      let analyticsList = document.getElementById("analytics").children;
+      analyticsList[0].classList.add("edit_target");
+      console.log(analyticsList[0]);
+      break;
+    case e.key == "e" && pen && edit:
+      edit = false;
       break;
     case e.key == "d":
       dashed = dashed ? false : true;

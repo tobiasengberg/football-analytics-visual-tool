@@ -49,3 +49,8 @@ svg > g polygon {
 .cursor {
   cursor: url(/img/pencil.svg), pointer;
 }
+
+.edit_target {
+  fill: orange;
+  stroke: orange;
+}
